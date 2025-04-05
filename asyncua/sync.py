@@ -190,7 +190,7 @@ def sync_async_client_method(aio_func):
 
 
 @syncfunc(aio_func=common.methods.call_method_full)
-def call_method_full(parent, methodid, *args):
+def call_method_full(parent, methodid, *args, checkStatus=True):
     pass
 
 

@@ -32,7 +32,7 @@ async def call_method(parent: asyncua.Node, methodid: Union[ua.NodeId, ua.Qualif
 
 
 async def call_method_full(
-    parent: asyncua.Node, methodid: Union[ua.NodeId, ua.QualifiedName, str], *args
+    parent: asyncua.Node, methodid: Union[ua.NodeId, ua.QualifiedName, str], *args, checkStatus: bool = True
 ) -> ua.CallMethodResult:
     """
     Call an OPC-UA method. methodid is browse name of child method or the
@@ -47,14 +47,14 @@ async def call_method_full(
     elif hasattr(methodid, "nodeid"):
         methodid = methodid.nodeid
 
-    result = await _call_method(parent.session, parent.nodeid, methodid, to_variant(*args))
+    result = await _call_method(parent.session, parent.nodeid, methodid, to_variant(*args), checkStatus)
     if result.OutputArguments is None:
         result.OutputArguments = []
     result.OutputArguments = [var.Value for var in result.OutputArguments]
     return result
 
 
-async def _call_method(session, parentnodeid, methodid, arguments):
+async def _call_method(session, parentnodeid, methodid, arguments, checkStatus=True):
     """
     :param server: `UaClient` or `InternalSession`
     :param parentnodeid:
@@ -69,7 +69,8 @@ async def _call_method(session, parentnodeid, methodid, arguments):
     methodstocall = [request]
     results = await session.call(methodstocall)
     res = results[0]
-    res.StatusCode.check()
+    if checkStatus:
+        res.StatusCode.check()
     return res
 
 
